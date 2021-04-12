@@ -1,5 +1,24 @@
 # Hubitat Elevation MQTT Link
 
+***Modified to integrate with Hubitat Elevation with Home Assistant and Mosquitto specifically***
+
+The code here has diverged from that developed by mydevbox in that I am working to customize it to send messages to Home Assistant such that devices from HE can be automatically integrated. To accomplish that goal, I've added some code to build a `/config` topic structured to comply with [Home Assistant Discovery](https://www.home-assistant.io/docs/mqtt/discovery/).
+
+To use this, you'll need to configure Home Assistant to look for the prefix "hubitat/your-hub-name/discovery":
+
+~~~~~
+mqtt:
+    discovery_prefix: "hubitat/your-hub-name/discovery"
+~~~~~
+
+If you're using MQTT already to expose devices using the default "homeassistant" prefix, this won't work just yet. My personal setup has ZwaveJS2MQTT delivering stuff to "homeassistant" but not consuming it for devices (I'm using the devices directly from ZwaveJS). If I coded this to use the default topic, I would have a lot of duplicate devices.
+
+I may normalize this in the future, but I'm happy with it as it is at the moment. I'm new to Home Assistant, MQTT, and Groovy, so it'll take me a bit to figure out the best way to structure all of this.
+
+Pull requests are welcome.
+
+-Justin
+
 ***System to share and control Hubitat Elevation device states in MQTT.***
 
 MQTT Link is a derivative of  [MQTT Bridge](https://github.com/jeubanks/hubitat-mqtt-bridge) for Hubitat released by jeubanks who derived it from [MQTT Bridge](https://github.com/stjohnjohnson/smartthings-mqtt-bridge) for SmartThings by stjohnjohnson.
