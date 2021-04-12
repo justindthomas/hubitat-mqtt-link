@@ -225,19 +225,31 @@ def sendDeviceEvent(message) {
     publishMqtt("${message.normalizedId}/${message.name}", message.value)
     
     if (message.pingRefresh) {
-        def json = new JsonOutput().toJson([
-            command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/${message.name}",
-            state_topic: "${getTopicPrefix()}${message.component}/${message.normalizedId}/${message.name}",
-            name: message.deviceLabel,
-            device: [
-                identifiers: [
-                    message.normalizedId    
-                ],
-                model: message.model,
-            ]
-        ])
+        def supported_devices = [ 
+            "switch",
+            "dimmer",
+        ]
         
-        publishMqtt("discovery/${message.component}/${message.normalizedId}/${message.name}/config", json)
+        if (supported_devices.contains(message.name)) { 
+            def json = new JsonOutput().toJson([
+                command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/${message.name}",
+                state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+                payload_on: "on",
+                payload_off: "off",
+                name: message.deviceLabel,
+                device: [
+                    identifiers: [
+                        message.normalizedId    
+                    ],
+                    model: message.model,
+                    manufacturer: "Hubitat",
+                    name: "${message.deviceLabel}",
+                ]
+            ])
+        
+            publishMqtt("discovery/${message.component}/${message.normalizedId}/${message.name}/config", json)
+        }
+        
         return
     }
     
