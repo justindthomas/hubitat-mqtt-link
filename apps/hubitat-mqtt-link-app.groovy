@@ -79,6 +79,26 @@ def capabilitiesPage() {
                                   "Indicator","Light","Lock Only","Music Player","Outlet","Polling","Relay Switch",
                                   "Sensor","Shock Sensor","Thermostat Setpoint","Thermostat","Touch Sensor",
                                   "Configuration","Refresh"]
+    
+    def homeAssistantComponents = [
+        alarm_control_panel: "Alarm Control Panel",
+        binary_sensor: "Binary Sensor",
+        camera: "Camera",
+        cover: "Cover",
+        device_tracker: "Device Tracker",
+        device_automation: "Device Trigger",
+        fan: "Fan",
+        climate: "HVAC",
+        light: "Light",
+        lock: "Lock",
+        scene: "Scene",
+        sensor: "Sensor",
+        switch: "Switch",
+        tag: "Tag Scanner",
+        vacuum: "Vacuum"
+    ]
+        
+        
     dynamicPage(name: "capabilitiesPage") {        
         section ("<h2>Specify Exposed Capabilities per Device</h2>") {
             paragraph """<style>.pill {border-radius:4px;background-color:#337ab7;color:#fff;padding:10px 15px;
@@ -127,6 +147,16 @@ def capabilitiesPage() {
                 paragraph "<div class=\"pill\">${device.getDisplayName()}</div>"
 
                 input (
+                    name: "${normalizeId}-component",
+                    type: "enum",
+                    title: "Home Assistant Component",
+                    options: homeAssistantComponents,
+                    required: true, 
+                    multiple: false,
+                    submitOnChange: false
+                )
+                
+                input (
                     name: normalizeId, 
                     type: "enum",
                     title: "",
@@ -138,7 +168,7 @@ def capabilitiesPage() {
             }
         }
     }
-}
+}   
 
 // Massive lookup tree
 @Field CAPABILITY_MAP = [
@@ -901,9 +931,20 @@ def inputHandler(evt) {
                 type: evt.type,
                 value: evt.value,
                 unit: evt.unit,
+                component: settings["${normalizedId(evt)}-component"],
             ]
 		])
         
+        settings.each { device -> 
+           debug("[a:getDeviceObj] ${device}")
+        }
+        
+        debug("Device: ${normalizedId(evt)}")
+        
+        component = "${normalizedId(evt)}-component"
+        
+        debug("Home Assistant Component: ${settings[component]}")
+              
 		debug("[a:inputHandler] Forwarding device event to driver: ${json}")
         mqttLink.deviceNotification(json)
 	}
@@ -939,6 +980,9 @@ def pingState() {
                             normalizedId: deviceId,
                             name: attribute.name,
                             value: currentValue.toString(),
+                            deviceLabel: device.displayName,
+                            model: device.typeName,
+                            component: settings["${deviceId}-component"],
                             pingRefresh: true
                         ])
                 }

@@ -221,18 +221,29 @@ def deviceSubscribe(message) {
 }
 
 def sendDeviceEvent(message) {
-    topic = "${message.normalizedId}/"
-    
     // Send command value only
-    publishMqtt("${topic}${message.name}", message.value)
+    publishMqtt("${message.normalizedId}/${message.name}", message.value)
     
     if (message.pingRefresh) {
+        def json = new JsonOutput().toJson([
+            command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/${message.name}",
+            state_topic: "${getTopicPrefix()}${message.component}/${message.normalizedId}/${message.name}",
+            name: message.deviceLabel,
+            device: [
+                identifiers: [
+                    message.normalizedId    
+                ],
+                model: message.model,
+            ]
+        ])
+        
+        publishMqtt("discovery/${message.component}/${message.normalizedId}/${message.name}/config", json)
         return
     }
     
     if (settings.sendPayload) {
         // Send detailed event object
-        publishMqtt("${topic}payload", JsonOutput.toJson(message))
+        publishMqtt("${message.normalizedId}/payload", JsonOutput.toJson(message))
     }
 }
 
