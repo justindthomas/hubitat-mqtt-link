@@ -220,34 +220,214 @@ def deviceSubscribe(message) {
 	}
 }
 
+def sendSwitchConfig(message) {
+    def json = new JsonOutput().toJson([
+        command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/${message.name}",
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        payload_on: "on",
+        payload_off: "off",
+        name: message.deviceLabel,
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/${message.name}/config", json)
+}
+
+def sendPowerConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        unit_of_measurement: "W",
+        device_class: "power",
+        name: "${message.deviceLabel} Current Energy Draw",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/electric_w_value/config", json)
+}
+
+def sendDimmerConfig(message) {
+    def json = new JsonOutput().toJson([
+        command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/switch",
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/switch",
+        brightness_command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/switchLevel",
+        brightness_scale: 99,
+        brightness_state_topic: "${getTopicPrefix()}${message.normalizedId}/level",
+        payload_on: "on",
+        payload_off: "off",
+        name: message.deviceLabel,
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/dimmer/config", json)
+}
+
+def sendEnergyConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        unit_of_measurement: "kWh",
+        device_class: "power",
+        name: "${message.deviceLabel} Cumulative Energy",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/electric_kwh_value/config", json)
+}
+
+def sendVoltageConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        unit_of_measurement: "V",
+        device_class: "power",
+        name: "${message.deviceLabel} Current Voltage",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/electric_v_value/config", json)
+}
+
+def sendBatteryConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        unit_of_measurement: "%",
+        device_class: "battery",
+        name: "${message.deviceLabel} Battery",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/battery_level/config", json)
+}
+
+def sendContactConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        device_class: "garage_door",
+        name: "${message.deviceLabel} Contact",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/contact/config", json)
+}
+
+def sendMotionConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        device_class: "motion",
+        name: "${message.deviceLabel} Motion",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/motion/config", json)
+}
+
+def sendTamperConfig(message) {
+    def json = new JsonOutput().toJson([
+        state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
+        device_class: "safety",
+        name: "${message.deviceLabel} Tamper",
+        device: [
+            identifiers: [
+                message.normalizedId    
+            ],
+            model: message.model,
+            manufacturer: message.manufacturer,
+            name: message.deviceLabel,
+        ]
+    ])
+
+    publishMqtt("discovery/${message.component}/${message.normalizedId}/tamper/config", json)
+}
+
 def sendDeviceEvent(message) {
     // Send command value only
     publishMqtt("${message.normalizedId}/${message.name}", message.value)
     
-    if (message.pingRefresh) {
-        def supported_devices = [ 
-            "switch",
-            "dimmer",
-        ]
-        
-        if (supported_devices.contains(message.name)) { 
-            def json = new JsonOutput().toJson([
-                command_topic: "${getTopicPrefix()}${message.normalizedId}/cmd/${message.name}",
-                state_topic: "${getTopicPrefix()}${message.normalizedId}/${message.name}",
-                payload_on: "on",
-                payload_off: "off",
-                name: message.deviceLabel,
-                device: [
-                    identifiers: [
-                        message.normalizedId    
-                    ],
-                    model: message.model,
-                    manufacturer: "Hubitat",
-                    name: "${message.deviceLabel}",
-                ]
-            ])
-        
-            publishMqtt("discovery/${message.component}/${message.normalizedId}/${message.name}/config", json)
+    if (message.pingRefresh) {  
+        if (message.component != null) {
+            switch(message.name) {
+                case "switch": 
+                    sendSwitchConfig(message)
+                    break
+                case "power":
+                    sendPowerConfig(message)
+                    break
+                case "energy":
+                    sendEnergyConfig(message)
+                    break
+                case "level":
+                    sendDimmerConfig(message)
+                    break
+                case "voltage":
+                    sendVoltageConfig(message)
+                    break
+                case "battery":
+                    sendBatteryConfig(message)
+                    break
+                case "contact":
+                    sendContactConfig(message)
+                    break
+                case "tamper":
+                    sendTamperConfig(message)
+                    break
+                case "motion":
+                    sendMotionConfig(message)
+                    break
+            }
         }
         
         return

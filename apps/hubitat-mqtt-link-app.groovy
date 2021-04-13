@@ -145,16 +145,6 @@ def capabilitiesPage() {
                 def normalizeId = normalizeId(device)
                 
                 paragraph "<div class=\"pill\">${device.getDisplayName()}</div>"
-
-                input (
-                    name: "${normalizeId}-component",
-                    type: "enum",
-                    title: "Home Assistant Component",
-                    options: homeAssistantComponents,
-                    required: true, 
-                    multiple: false,
-                    submitOnChange: false
-                )
                 
                 input (
                     name: normalizeId, 
@@ -168,7 +158,221 @@ def capabilitiesPage() {
             }
         }
     }
-}   
+}
+
+@Field DEVICE_LIBRARY = [
+    "798": [
+        manufacturer: "Inovelli",
+        devices: [
+            "1": [
+                product: "lzw31-sn",
+                component: [
+                    level: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                ],
+                deviceType: [
+                    level: "dimmer",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                ]
+            ],
+            "2": [
+                product: "lzw30",
+                component: [
+                    switch: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                ],
+                deviceType: [
+                    switch: "switch",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                ]
+            ],
+            "3": [
+                product: "lzw31",
+                component: [
+                    level: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                ],
+                deviceType: [
+                    level: "dimmer",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                ]
+            ],
+            "4": [
+                product: "lzw30-sn",
+                component: [
+                    switch: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                ],
+                deviceType: [
+                    switch: "switch",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                ]
+            ],
+            "5": [
+                product: "lzw42",
+                component: [
+                    level: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                ],
+                deviceType: [
+                    level: "dimmer",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                ]
+            ]       
+        ]
+    ],
+    "99": [
+        manufacturer: "General Electric",
+        devices: [
+            "18770": [
+                product: "wall outlet",
+                component: [
+                    switch: "light",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ],
+            "20562": [
+                product: "portable plug",
+                component: [
+                    switch: "light",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ],
+            "20548": [
+                product: "plug in dimmer",
+                component: [
+                    level: "light",
+                ],
+                deviceType: [
+                    level: "dimmer",
+                ]
+            ] 
+        ]
+    ],
+    "786": [
+        manufacturer: "EVA LOGIK",
+        devices: [
+            "65280": [
+                product: "exterior switching outlet",
+                component: [
+                    switch: "switch",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ]
+        ]
+    ],
+    "634": [
+        manufacturer: "Zooz",
+        devices: [
+            "257": [
+                product: "switching outlet dongle",
+                component: [
+                    switch: "light",
+                    power: "sensor",
+                    energy: "sensor",
+                    voltage: "sensor",
+                ],
+                deviceType: [
+                    switch: "switch",
+                    power: "electric_w_value",
+                    energy: "electric_kwh_value",
+                    voltage: "electric_v_value",
+                ]
+            ],
+            "769": [
+                product: "zse18 motion sensor",
+                component: [
+                    motion: "binary_sensor",
+                    battery: "sensor",
+                ],
+                deviceType: [
+                    motion: "motion",
+                    battery: "battery_level",
+                ]
+            ],
+        ]
+    ],
+    "330": [
+        manufacturer: "Generic",
+        devices: [
+            "1": [
+                product: "motion sensor",
+                component: [
+                    motion: "binary_sensor",
+                ],
+                deviceType: [
+                    motion: "motion"
+                ],
+            ],
+            "4": [
+                product: "garage door tilt sensor",
+                component: [
+                    battery: "sensor",
+                    contact: "binary_sensor",
+                    tamper: "binary_sensor",
+                ],
+                deviceType: [
+                    battery: "battery_level",
+                    contact: "contact",
+                    tamper: "tamper",
+                ],
+            ]
+        ]
+    ],
+    "335": [
+        manufacturer: "Generic",
+        devices: [
+            "21062": [
+                product: "exterior switching relay",
+                component: [
+                    switch: "switch",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ]
+        ]
+    ],
+    "29": [
+        manufacturer: "Leviton",
+        devices: [
+            "13313": [
+                product: "basic wall switch",
+                component: [
+                    switch: "light",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ],
+            "7170": [
+                product: "basic wall switch",
+                component: [
+                    switch: "light",
+                ],
+                deviceType: [
+                    switch: "switch",
+                ]
+            ]
+        ]
+    ],
+]
 
 // Massive lookup tree
 @Field CAPABILITY_MAP = [
@@ -597,7 +801,7 @@ def capabilitiesPage() {
 		name: "Switch Level",
 		capability: "capability.switchLevel",
 		attributes: [
-			"level" // 0 - 100
+			"switchLevel" // 0 - 100
 		],
 		action: "actionSwitchLevel"
 	],
@@ -934,16 +1138,6 @@ def inputHandler(evt) {
                 component: settings["${normalizedId(evt)}-component"],
             ]
 		])
-        
-        settings.each { device -> 
-           debug("[a:getDeviceObj] ${device}")
-        }
-        
-        debug("Device: ${normalizedId(evt)}")
-        
-        component = "${normalizedId(evt)}-component"
-        
-        debug("Home Assistant Component: ${settings[component]}")
               
 		debug("[a:inputHandler] Forwarding device event to driver: ${json}")
         mqttLink.deviceNotification(json)
@@ -975,16 +1169,23 @@ def pingState() {
                     def currentValue = device."current${attributeName}"
             
                     debug("[a:pingState] Sending state refresh: ${device}:${attribute}:${currentValue}")
+                    debug("[a:pingState] Details: ${device.data.manufacturer}:${device.data.deviceType}:${device.typeName}:${attribute.name}:${device.displayName}")
+                    
+                    def manufacturer = DEVICE_LIBRARY[device.data.manufacturer]["manufacturer"]
+                    def component = DEVICE_LIBRARY[device.data.manufacturer]["devices"][device.data.deviceType]["component"][attribute.name]
+                    def type = DEVICE_LIBRARY[device.data.manufacturer]["devices"][device.data.deviceType]["deviceType"][attribute.name]
                     
                     pingList.add([
-                            normalizedId: deviceId,
-                            name: attribute.name,
-                            value: currentValue.toString(),
-                            deviceLabel: device.displayName,
-                            model: device.typeName,
-                            component: settings["${deviceId}-component"],
-                            pingRefresh: true
-                        ])
+                        normalizedId: deviceId,
+                        name: attribute.name,
+                        value: currentValue.toString(),
+                        deviceLabel: device.displayName,
+                        model: device.typeName,
+                        manufacturer: manufacturer,
+                        component: component,
+                        deviceType: type,
+                        pingRefresh: true
+                    ])
                 }
             }
         }
@@ -1379,6 +1580,7 @@ def actionSpeechSynthesis(device, attribute, value) {
 }
 
 def actionSwitchLevel(device, attribute, value) {
+    debug("WTFWTF: ${value}")
 	device.setLevel(value as int)
 }
 
